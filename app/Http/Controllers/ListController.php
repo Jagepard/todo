@@ -18,15 +18,23 @@ class ListController extends Controller
         ]);
     }
 
+    public function search(Request $request) 
+    {
+        $items = Item::search($request, Auth::id());
+
+        return view('todo.search', [
+            'items' => $items,
+            'title' => 'ToDo'
+        ]);
+    }
+
     public function update(Request $request)
     {
         $this->validate($request, [
             'task' => 'required'
         ]);
 
-        $item = Item::where('id', $request->id);
-
-        $item->update([
+        Item::where('id', $request->id)->update([
             'text' => $request->task,
         ]);
 
@@ -55,7 +63,7 @@ class ListController extends Controller
         $item     = Item::where('id', $id);
         $itemData = $item->first();
 
-        if ($itemData->img !== '') {
+        if (isset($itemData->img) && $itemData->img !== '') {
             if(Storage::exists('public/'.$itemData->img)){
                 Storage::delete([
                     'public/'.$itemData->img, 
@@ -67,15 +75,5 @@ class ListController extends Controller
         $item->delete();
 
         return redirect()->back();
-    }
-
-    public function search(Request $request) 
-    {
-        $items = Item::search($request, Auth::id());
-
-        return view('todo.search', [
-            'items' => $items,
-            'title' => 'ToDo'
-        ]);
     }
 }
